@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────
+# NEVER COMMIT REAL CREDENTIALS
+# ─────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+
+# ─────────────────────────────────────────
+# Frontend (Vite / Node)
+# ─────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.vercel/
+
+# ─────────────────────────────────────────
+# Backend (Python)
+# ─────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+backend/.venv/
+backend/venv/
+backend/*.egg-info/
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/htmlcov/
+backend/.coverage
+
+# ─────────────────────────────────────────
+# HuggingFace model cache (large files)
+# ─────────────────────────────────────────
+backend/.cache/
+*.safetensors
+*.bin
+
+# ─────────────────────────────────────────
+# OS / Editor
+# ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# ─────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────
+.dockerignore
