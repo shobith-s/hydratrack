@@ -1,0 +1,57 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HydroTrack — Local Development Stack
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:
+#   1. cp backend/.env.example backend/.env  (fill in your values)
+#   2. docker compose up
+#   3. cd frontend && npm install && npm run dev
+#
+# Note: This runs a local Postgres for backend dev without needing Supabase.
+#       For push notifications, you still need real VAPID keys.
+#       For RLS / auth testing, use your real Supabase project.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hydrotrack
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override Supabase URL with local Postgres for local dev
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/hydrotrack
+    ports:
+      - "7860:7860"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      # Cache HuggingFace model downloads between rebuilds
+      - hf_cache:/root/.cache/huggingface
+
+volumes:
+  postgres_data:
+  hf_cache:
