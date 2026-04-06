@@ -8,7 +8,7 @@ Routes:
   POST /subscribe     — save VAPID push subscription (auth required)
   GET  /analytics     — fetch today's stats + weekly history (auth required)
 """
-from __future__ import annotations
+
 
 import json
 from contextlib import asynccontextmanager
