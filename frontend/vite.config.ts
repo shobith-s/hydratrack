@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  resolve: {
+    dedupe: ['react', 'react-dom', 'react-is'],
+  },
+  optimizeDeps: {
+    include: ['react-is', 'recharts'],
+  },
   plugins: [
     react(),
     VitePWA({
