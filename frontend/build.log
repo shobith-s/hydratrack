@@ -1,0 +1,60 @@
+
+> vite-temp@0.0.0 build
+> tsc -b && vite build
+
+vite v8.0.5 building client environment for production...
+[2Ktransforming...✓ 2348 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/registerSW.js                0.13 kB
+dist/manifest.webmanifest         0.36 kB
+dist/index.html                   0.58 kB │ gzip:   0.34 kB
+dist/assets/index-CSy5PRYz.css    2.06 kB │ gzip:   0.79 kB
+dist/assets/index-Cw76xE_k.js   354.36 kB │ gzip: 105.17 kB
+
+✗ Build failed in 497ms
+
+PWA v1.2.0
+Building src/sw.ts service worker ("es" format)...
+vite v8.0.5 building client environment for production...
+
+ WARN  inlineDynamicImports option is deprecated, please use codeSplitting: false instead.
+
+[2Ktransforming...✓ 54 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/sw.mjs  16.16 kB │ gzip: 5.47 kB
+
+✓ built in 28ms
+
+PWA v1.2.0
+mode      injectManifest
+format:   es
+precache  5 entries (348.77 KiB)
+files generated
+  dist/sw.js
+error during build:
+Build failed with 1 error:
+
+Error: [vite]: Rolldown failed to resolve import "react-is" from "/home/shobiths/projects/hydratrack/frontend/node_modules/recharts/es6/util/ReactUtils.js".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`
+    at viteLog (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33032:57)
+    at file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33068:71
+    at onwarn (file:///home/shobiths/projects/hydratrack/frontend/node_modules/@vitejs/plugin-react/dist/index.js:40:7)
+    at file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33068:28
+    at onRollupLog (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33063:63)
+    at onLog (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:32832:4)
+    at file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/rolldown-build-CPrIX9V6.mjs:49:26
+    at logger (file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/rolldown-build-CPrIX9V6.mjs:40:3)
+    at onLog (file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/bindingify-input-options-e7ze4hPR.mjs:1972:32)
+    at aggregateBindingErrorsIntoJsError (file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/error-BLhcSyeg.mjs:48:18)
+    at unwrapBindingResult (file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/error-BLhcSyeg.mjs:18:128)
+    at #build (file:///home/shobiths/projects/hydratrack/frontend/node_modules/rolldown/dist/shared/rolldown-build-CPrIX9V6.mjs:3313:34)
+    at async buildEnvironment (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:32939:64)
+    at async Object.build (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33361:19)
+    at async Object.buildApp (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/chunks/node.js:33358:153)
+    at async CAC.<anonymous> (file:///home/shobiths/projects/hydratrack/frontend/node_modules/vite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}

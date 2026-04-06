@@ -2,11 +2,9 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthGate } from './components/AuthGate'
 import { PermissionsGate } from './components/PermissionsGate'
 import { InstallPrompt } from './components/InstallPrompt'
-
-// Placeholder components for Phase 4
-const Dashboard = () => <div className="p-8">Dashboard Screen</div>
-const Camera = () => <div className="p-8">Camera Screen</div>
-const History = () => <div className="p-8">History Screen</div>
+import { Dashboard } from './components/Dashboard/Dashboard'
+import { CameraScreen } from './components/Camera/CameraScreen'
+import { HistoryScreen } from './components/History/HistoryScreen'
 
 function App() {
   return (
@@ -18,8 +16,8 @@ function App() {
             <main className="flex-1 overflow-y-auto pb-20">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/camera" element={<Camera />} />
-                <Route path="/history" element={<History />} />
+                <Route path="/camera" element={<CameraScreen />} />
+                <Route path="/history" element={<HistoryScreen />} />
               </Routes>
             </main>
             
