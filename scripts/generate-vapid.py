@@ -10,7 +10,7 @@ Then set the printed values in:
   • HuggingFace Space secrets  → VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
 
 Requirements:
-    pip install pywebpush
+    pip install pywebpush py-vapid
 """
 from py_vapid import Vapid
 

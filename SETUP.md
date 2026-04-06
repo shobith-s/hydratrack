@@ -14,10 +14,9 @@ HydroTrack is designed so you can host it yourself. Your data stays with you.
 4. Go to Settings > API and reveal your `service_role` key. This is a secure secret.
 
 ## 2. Push Notification VAPID Keys
-1. In the `scripts` folder, ensure you have Python installed.
-2. Run `pip install pywebpush extcurves`.
-3. Run `python generate-vapid.py`.
-4. Save the generated Public Key and Private Key.
+1. Open your terminal in any directory.
+2. Run `npx web-push generate-vapid-keys`.
+3. Save the generated Public Key and Private Key.
 
 ## 3. HuggingFace Backend
 1. Create a new Space. Choose "Docker" as the SDK.
