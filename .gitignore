@@ -52,3 +52,5 @@ Thumbs.db
 # ─────────────────────────────────────────
 .dockerignore
 dev-dist
+
+stitch_hydrotrack_pwa/
