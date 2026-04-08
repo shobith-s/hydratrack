@@ -2,12 +2,16 @@ import { useEffect } from 'react'
 import { useDrinkStore } from '../../store/drinkStore'
 import { fetchApi } from '../../lib/api'
 import { ProgressRing } from './ProgressRing'
-import { HourlyTimeline } from './HourlyTimeline'
-import { StreakBadge } from './StreakBadge'
 import { EmergencyMode } from './EmergencyMode'
-import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { usePush } from '../../hooks/usePush'
+
+const ML_PER_DRINK = 250
+
+function formatTime(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+}
 
 export function Dashboard() {
   const store = useDrinkStore()
@@ -15,7 +19,6 @@ export function Dashboard() {
   const { subscribeToPush } = usePush()
 
   useEffect(() => {
-    // Attempt push subscription in background when dashboard loads if permitted
     if (Notification.permission === 'granted') {
       subscribeToPush()
     }
@@ -25,7 +28,15 @@ export function Dashboard() {
       store.setError(null)
       try {
         const data = await fetchApi('/analytics')
-        store.setAnalytics(data)
+        store.setAnalytics({
+          dailyGoalMl: data.daily_goal_ml,
+          todayConfirmedCount: data.today_confirmed_count,
+          todayMlEstimate: data.today_ml_estimate,
+          streakDays: data.streak_days,
+          hourlyBreakdown: data.hourly_breakdown,
+          weeklyHistory: data.weekly_history,
+          todayEntries: data.today_entries ?? [],
+        })
       } catch (e: any) {
         store.setError(e.message)
       } finally {
@@ -33,49 +44,113 @@ export function Dashboard() {
       }
     }
     loadStats()
-  }, []) // Empty deps, only run once on mount
+  }, [])
 
   if (store.isLoading && store.todayConfirmedCount === 0) {
-    return <div className="p-8 font-bold text-center">Loading your progress...</div>
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="font-black text-center uppercase tracking-widest">Loading...</div>
+      </div>
+    )
   }
 
-  const reachedGoal = store.todayMlEstimate >= store.dailyGoalMl
+  const pctDone = Math.round((store.todayMlEstimate / store.dailyGoalMl) * 100)
+  const nextReminderHrs = '1 HR'
 
   return (
-    <div className="p-4 flex flex-col gap-6">
-      <div className="flex justify-between items-center bg-[#F6FA70] p-4 neo-border shadow-md rounded-none mt-2">
-        <div>
-          <h2 className="text-xl font-bold">Good morning! ☀️</h2>
-          <p className="text-sm">Stay hydrated today.</p>
-        </div>
-        <StreakBadge days={store.streakDays} />
+    <div className="px-4 py-6 flex flex-col gap-6 max-w-lg mx-auto w-full">
+
+      {/* Progress Ring */}
+      <div className="flex justify-center">
+        <ProgressRing current={store.todayMlEstimate} target={store.dailyGoalMl} />
       </div>
 
-      <div className="flex justify-center my-4 relative">
-        <ProgressRing current={store.todayMlEstimate} target={store.dailyGoalMl} />
-        {reachedGoal && (
-          <div className="absolute inset-0 flex items-center justify-center animate-bounce pointer-events-none">
-            <span className="text-4xl">🏆</span>
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
+          <span className="text-2xl" style={{ color: '#FF4500' }}>🔥</span>
+          <span className="text-xl font-black leading-none">{store.streakDays}</span>
+          <span className="text-[10px] font-black uppercase leading-none mt-1">Streak</span>
+        </div>
+        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
+          <span className="text-xl font-black leading-none text-[#0448FF]">📊</span>
+          <span className="text-xl font-black leading-none">{pctDone}%</span>
+          <span className="text-[10px] font-black uppercase leading-none mt-1">Done</span>
+        </div>
+        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
+          <span className="text-xl font-black leading-none">⏱</span>
+          <span className="text-xl font-black leading-none">{nextReminderHrs}</span>
+          <span className="text-[10px] font-black uppercase leading-none mt-1">Reminder</span>
+        </div>
+      </div>
+
+      {/* Offline queue */}
+      <EmergencyMode />
+
+      {/* Today's Drinks */}
+      <div className="flex flex-col gap-3">
+        <div className="relative inline-block">
+          <h2 className="text-xl font-black uppercase tracking-tight relative z-10">Today's Drinks</h2>
+          <div className="absolute bottom-1 left-0 w-full h-3 bg-[#FDD400] -z-[1]" />
+        </div>
+
+        {store.todayEntries.length === 0 ? (
+          <div className="bg-white border-[3px] border-black p-4 text-sm font-bold text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
+            No drinks logged yet today. Tap <span className="font-black">RECORD</span> to start!
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {store.todayEntries.map((entry) => {
+              const conf = entry.confidence != null ? Math.round(entry.confidence * 100) : null
+              return (
+                <div
+                  key={entry.id}
+                  className="bg-white border-[3px] border-black p-4 flex justify-between items-center"
+                  style={{ boxShadow: '5px 5px 0px #000' }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#0448FF] border-[3px] border-black flex items-center justify-center flex-shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-black text-lg leading-none">{ML_PER_DRINK} ML</p>
+                      <p className="text-[10px] font-black uppercase opacity-60 mt-1">{formatTime(entry.logged_at)}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="bg-[#00C896] border-[2px] border-black px-2 py-0.5 text-[8px] font-black uppercase">
+                      Verified ✓
+                    </div>
+                    {conf != null && (
+                      <span className="text-[10px] font-black">{conf}% CONF.</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
 
-      <EmergencyMode />
-
-      <HourlyTimeline breakdown={store.hourlyBreakdown} />
-
-      <button 
-        onClick={() => navigate('/camera')}
-        className="neo-button primary w-full flex items-center justify-center gap-2 py-4"
-      >
-        <Plus /> Log Drink
-      </button>
-
       {store.error && (
-        <div className="text-sm font-bold text-[#FF0060] p-2 bg-white neo-border text-center">
-          Error: {store.error}
+        <div className="text-sm font-bold text-[#FF3B30] p-3 bg-white border-[3px] border-black text-center">
+          {store.error}
         </div>
       )}
+
+      {/* FAB: Log Drink */}
+      <button
+        onClick={() => navigate('/camera')}
+        className="fixed bottom-24 right-4 w-14 h-14 bg-[#0448FF] border-[3px] border-black text-white flex items-center justify-center z-40 active:translate-x-[2px] active:translate-y-[2px] transition-all"
+        style={{ boxShadow: '5px 5px 0px #000' }}
+        aria-label="Log drink"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
     </div>
   )
 }

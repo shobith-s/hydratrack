@@ -11,6 +11,13 @@ export interface DayRecord {
   goal_hit: boolean
 }
 
+export interface DrinkEntry {
+  id: string
+  logged_at: string
+  confirmed: boolean
+  confidence: number | null
+}
+
 interface AnalyticsState {
   dailyGoalMl: number
   todayConfirmedCount: number
@@ -18,9 +25,10 @@ interface AnalyticsState {
   streakDays: number
   hourlyBreakdown: HourlyBucket[]
   weeklyHistory: DayRecord[]
+  todayEntries: DrinkEntry[]
   isLoading: boolean
   error: string | null
-  
+
   setAnalytics: (data: Partial<AnalyticsState>) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -33,6 +41,7 @@ export const useDrinkStore = create<AnalyticsState>((set) => ({
   streakDays: 0,
   hourlyBreakdown: [],
   weeklyHistory: [],
+  todayEntries: [],
   isLoading: false,
   error: null,
 

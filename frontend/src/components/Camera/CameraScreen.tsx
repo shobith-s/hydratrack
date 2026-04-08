@@ -4,12 +4,12 @@ import { extractFrames } from './FrameExtractor'
 import { fetchApi } from '../../lib/api'
 import { useOfflineQueue } from '../../store/offlineQueueStore'
 import { useNavigate } from 'react-router-dom'
-import { Camera as CameraIcon } from 'lucide-react'
 
 export function CameraScreen() {
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
+  const [capturedFrames, setCapturedFrames] = useState<string[]>([])
   const addOfflineLog = useOfflineQueue(state => state.addLog)
   const navigate = useNavigate()
 
@@ -19,10 +19,9 @@ export function CameraScreen() {
     setError(null)
 
     try {
-      // 1. Extract frames (3 frames over 900ms)
       const frames = await extractFrames(videoEl, 3, 300)
+      setCapturedFrames(frames)
 
-      // 2. Call /verify API
       let confirmed = false
       let confidence = 0.0
 
@@ -34,33 +33,25 @@ export function CameraScreen() {
         confirmed = verifyRes.confirmed
         confidence = verifyRes.confidence
       } catch (apiErr: any) {
-        // If offline or network error, fallback to unverified queue
         if (apiErr.message.includes('Failed to fetch') || !navigator.onLine) {
           addOfflineLog({
-            confirmed: true, // Assuming true since we can't verify offline
+            confirmed: true,
             confidence: 1.0,
             frames_sent: frames.length
           })
-          alert("You are offline. Drink saved and will sync later!")
-          navigate('/')
+          navigate('/result', { state: { confirmed: true, confidence: 1.0, offline: true } })
           return
         } else {
           throw apiErr
         }
       }
 
-      // 3. Log the result
       await fetchApi('/log', {
         method: 'POST',
-        body: JSON.stringify({
-          confirmed,
-          confidence,
-          frames_sent: frames.length
-        })
+        body: JSON.stringify({ confirmed, confidence, frames_sent: frames.length })
       })
 
-      // 4. Navigate to result/history
-      navigate('/history', { state: { confirmed, confidence } })
+      navigate('/result', { state: { confirmed, confidence } })
 
     } catch (err: any) {
       setError(err.message || 'Failed to capture or verify.')
@@ -70,39 +61,69 @@ export function CameraScreen() {
   }, [videoEl, analyzing, addOfflineLog, navigate])
 
   return (
-    <div className="p-4 flex flex-col gap-6 items-center">
-      <div className="w-full text-center">
-        <h1 className="text-2xl font-bold mb-2">Drink Verification</h1>
-        <p className="text-sm">Stand in frame and drink water for ~1 second.</p>
+    <div className="px-4 py-6 flex flex-col gap-6 max-w-lg mx-auto w-full">
+
+      {/* Viewfinder */}
+      <VideoRecorder onVideoReady={setVideoEl} onError={setError} capturedFrames={capturedFrames} />
+
+      {/* Instruction card */}
+      <div className="bg-white border-[3px] border-black p-5" style={{ boxShadow: '5px 5px 0px #000' }}>
+        <h2 className="font-black text-lg uppercase tracking-tight mb-1">DRINK WATER ON CAMERA</h2>
+        <p className="text-sm font-medium text-black/70 leading-tight">
+          Hold for 3–5 seconds. Show your face and the cup clearly within the frame.
+        </p>
       </div>
 
-      <div className="w-full max-w-sm">
-        <VideoRecorder onVideoReady={setVideoEl} onError={setError} />
-      </div>
+      {/* Frame preview strip (static placeholders before capture) */}
+      {capturedFrames.length === 0 && (
+        <div className="flex gap-2">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="flex-1 border-[3px] border-black bg-white flex flex-col items-center justify-center py-3 gap-1">
+              <div className="w-10 h-10 bg-neutral-100 border-[2px] border-black/20 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#bbb">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+              </div>
+              <span className="text-[8px] font-black uppercase">FRAME {n}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && (
-        <div className="neo-card bg-red-100 border-[#FF0060] text-sm w-full max-w-sm">
+        <div className="text-sm font-bold text-[#FF3B30] p-3 bg-white border-[3px] border-black">
           {error}
         </div>
       )}
 
-      <button
-        onClick={handleCapture}
-        disabled={!videoEl || analyzing}
-        className="neo-button primary w-full max-w-sm py-4 text-lg"
-      >
-        {analyzing ? 'Analyzing...' : (
-          <>
-            <CameraIcon /> Start Recording
-          </>
+      {/* Hold to Record button */}
+      <div className="flex flex-col items-center gap-3">
+        <button
+          onClick={handleCapture}
+          disabled={!videoEl || analyzing}
+          className="w-20 h-20 rounded-full bg-[#FF3B30] border-[3px] border-black disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center"
+          style={{ boxShadow: '5px 5px 0px #000' }}
+          aria-label="Record"
+        >
+          {analyzing ? (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white" className="animate-spin">
+              <path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/>
+            </svg>
+          ) : (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <circle cx="12" cy="12" r="8"/>
+            </svg>
+          )}
+        </button>
+        <span className="font-black text-sm uppercase tracking-widest">
+          {analyzing ? 'ANALYZING...' : 'HOLD TO RECORD'}
+        </span>
+        {!analyzing && (
+          <p className="text-[10px] font-bold text-black/50 text-center">
+            AI will verify your drink automatically
+          </p>
         )}
-      </button>
-
-      {analyzing && (
-        <div className="text-sm font-bold animate-pulse text-[#40A2E3]">
-          Running AI zero-shot verification...
-        </div>
-      )}
+      </div>
     </div>
   )
 }

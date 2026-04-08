@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&display=swap');
 
 :root {
   /* Neobrutalism Design Tokens */
@@ -6,21 +6,21 @@
   --c-black: #0F0F0F;
   --c-white: #FFFFFF;
   
-  --c-blue: #40A2E3;
-  --c-yellow: #F6FA70;
-  --c-mint: #00DFA2;
-  --c-red: #FF0060;
+  --c-blue: #0448FF;
+  --c-yellow: #FDD400;
+  --c-mint: #00C896;
+  --c-red: #FF3B30;
 
   --border-width: 3px;
   --border-style: solid;
   --border-color: var(--c-black);
   --border: var(--border-width) var(--border-style) var(--border-color);
 
-  --shadow-sm: 2px 2px 0px var(--c-black);
-  --shadow-md: 4px 4px 0px var(--c-black);
-  --shadow-lg: 6px 6px 0px var(--c-black);
-  
-  --shadow-hover: 1px 1px 0px var(--c-black);
+  --shadow-sm: 3px 3px 0px var(--c-black);
+  --shadow-md: 5px 5px 0px var(--c-black);
+  --shadow-lg: 5px 5px 0px var(--c-black);
+
+  --shadow-hover: 2px 2px 0px var(--c-black);
   --shadow-active: 0px 0px 0px var(--c-black);
 
   --radius: 0px;
@@ -89,10 +89,10 @@ body {
   box-shadow: var(--shadow-active);
 }
 
-.neo-button.primary { background-color: var(--c-blue); }
-.neo-button.secondary { background-color: var(--c-yellow); }
-.neo-button.success { background-color: var(--c-mint); }
-.neo-button.danger { background-color: var(--c-red); }
+.neo-button.primary { background-color: var(--c-blue); color: #fff; }
+.neo-button.secondary { background-color: var(--c-yellow); color: var(--c-black); }
+.neo-button.success { background-color: var(--c-mint); color: var(--c-black); }
+.neo-button.danger { background-color: var(--c-red); color: #fff; }
 
 .neo-card {
   background-color: var(--c-white);
