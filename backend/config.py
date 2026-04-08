@@ -32,12 +32,29 @@ class Settings(BaseSettings):
 
     @property
     def effective_database_url(self) -> str:
-        """Use Supabase transaction pooler URL if DATABASE_URL not explicitly set."""
-        if self.database_url:
-            return self.database_url
-        # Supabase connection pooler (Transaction mode, port 6543)
-        host = self.supabase_url.replace("https://", "").replace("http://", "")
-        return f"postgresql+asyncpg://postgres:{self.supabase_service_key}@{host}:6543/postgres"
+        """
+        Return an asyncpg-compatible database URL.
+
+        Priority:
+          1. DATABASE_URL env var (set this in HF Space secrets)
+             Supabase gives you a connection string like:
+               postgresql://postgres.REF:PASSWORD@pooler.supabase.com:6543/postgres
+             This property rewrites the scheme to postgresql+asyncpg:// automatically.
+          2. No fallback — DATABASE_URL must be set explicitly.
+             The supabase_service_key is NOT the database password.
+        """
+        if not self.database_url:
+            raise RuntimeError(
+                "DATABASE_URL is not set. "
+                "Get it from Supabase → Settings → Database → Connection string "
+                "(Transaction pooler mode) and add it to your HF Space secrets."
+            )
+        url = self.database_url
+        # Ensure asyncpg driver prefix
+        if url.startswith("postgresql://") or url.startswith("postgres://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url
 
 
 settings = Settings()  # type: ignore[call-arg]
