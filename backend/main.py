@@ -183,7 +183,7 @@ async def analytics(
     goal_row = goal_result.fetchone()
     daily_goal_ml = goal_row.daily_goal_ml if goal_row else 3000
 
-    # Today's confirmed count
+    # Today's confirmed count + individual entries
     today_result = await db.execute(
         text(
             """
@@ -201,6 +201,30 @@ async def analytics(
     today_rows = today_result.fetchall()
     today_confirmed = sum(r.cnt for r in today_rows)
     hourly = [HourlyBucket(hour=int(r.hour), count=int(r.cnt)) for r in today_rows]
+
+    entries_result = await db.execute(
+        text(
+            """
+            SELECT id, logged_at, confirmed, confidence
+            FROM drink_logs
+            WHERE user_id = :uid
+              AND logged_at >= :start
+              AND confirmed = true
+            ORDER BY logged_at DESC
+            """
+        ),
+        {"uid": user_id, "start": today_start},
+    )
+    entries_rows = entries_result.fetchall()
+    today_entries = [
+        DrinkEntry(
+            id=r.id,
+            logged_at=r.logged_at,
+            confirmed=r.confirmed,
+            confidence=r.confidence,
+        )
+        for r in entries_rows
+    ]
 
     # 7-day history
     week_ago = today_start - timedelta(days=6)
@@ -244,4 +268,5 @@ async def analytics(
         streak_days=streak,
         hourly_breakdown=hourly,
         weekly_history=weekly,
+        today_entries=today_entries,
     )

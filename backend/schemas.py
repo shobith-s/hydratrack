@@ -88,3 +88,4 @@ class AnalyticsResponse(BaseModel):
     streak_days: int
     hourly_breakdown: list[HourlyBucket]
     weekly_history: list[DayRecord]
+    today_entries: list[DrinkEntry] = []
