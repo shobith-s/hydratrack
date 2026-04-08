@@ -9,17 +9,20 @@ from __future__ import annotations
 
 import base64
 from io import BytesIO
+from typing import TYPE_CHECKING
 
-import torch
 from loguru import logger
-from PIL import Image
-from transformers import CLIPModel, CLIPProcessor
+
+if TYPE_CHECKING:
+    import torch
+    from PIL import Image
+    from transformers import CLIPModel, CLIPProcessor
 
 # ---------------------------------------------------------------------------
 # Module-level singletons — loaded ONCE via FastAPI lifespan
 # ---------------------------------------------------------------------------
-_model: CLIPModel | None = None
-_processor: CLIPProcessor | None = None
+_model: "CLIPModel | None" = None
+_processor: "CLIPProcessor | None" = None
 
 MODEL_NAME = "openai/clip-vit-base-patch32"
 LABELS = ["a person drinking water", "a person not drinking"]
@@ -29,6 +32,7 @@ CONFIDENCE_THRESHOLD = 0.55  # must beat random chance (0.5) by a clear margin
 def load_model() -> None:
     """Call this once at application startup (inside lifespan context)."""
     global _model, _processor
+    from transformers import CLIPModel, CLIPProcessor  # lazy — not needed in CI
     logger.info("Loading CLIP model: {}", MODEL_NAME)
     _processor = CLIPProcessor.from_pretrained(MODEL_NAME)
     _model = CLIPModel.from_pretrained(MODEL_NAME)
@@ -36,11 +40,12 @@ def load_model() -> None:
     logger.info("CLIP model loaded successfully")
 
 
-def _decode_frame(b64_string: str) -> Image.Image:
+def _decode_frame(b64_string: str) -> "Image.Image":
     """Decode a base64 JPEG string (no data-URI prefix) into a PIL Image."""
     # Strip data-URI prefix if browser accidentally sends it
     if "," in b64_string:
         b64_string = b64_string.split(",", 1)[1]
+    from PIL import Image  # lazy — not needed in CI
     raw = base64.b64decode(b64_string)
     return Image.open(BytesIO(raw)).convert("RGB")
 
@@ -68,6 +73,7 @@ def verify_frames(b64_frames: list[str]) -> dict:
         padding=True,
     )
 
+    import torch  # lazy — not needed in CI
     with torch.no_grad():
         outputs = _model(**inputs)
         # logits_per_image shape: [num_images, num_labels]
