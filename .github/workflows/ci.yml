@@ -33,7 +33,7 @@ jobs:
         VAPID_PUBLIC_KEY: "test-key"
         VAPID_CLAIMS_EMAIL: "test@test.com"
       run: |
-        cd backend && pytest
+        cd backend && PYTHONPATH=. pytest
 
   build-frontend:
     runs-on: ubuntu-latest
