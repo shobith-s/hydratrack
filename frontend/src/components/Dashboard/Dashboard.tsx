@@ -18,17 +18,23 @@ export function Dashboard() {
   const navigate = useNavigate()
   const { subscribeToPush } = usePush()
 
+  // Extract stable Zustand action references so the effect deps are satisfied
+  // without causing re-runs (Zustand actions never change between renders)
+  const setLoading = useDrinkStore(s => s.setLoading)
+  const setError = useDrinkStore(s => s.setError)
+  const setAnalytics = useDrinkStore(s => s.setAnalytics)
+
   useEffect(() => {
     if (Notification.permission === 'granted') {
       subscribeToPush()
     }
 
     async function loadStats() {
-      store.setLoading(true)
-      store.setError(null)
+      setLoading(true)
+      setError(null)
       try {
         const data = await fetchApi('/analytics')
-        store.setAnalytics({
+        setAnalytics({
           dailyGoalMl: data.daily_goal_ml,
           todayConfirmedCount: data.today_confirmed_count,
           todayMlEstimate: data.today_ml_estimate,
@@ -37,14 +43,14 @@ export function Dashboard() {
           weeklyHistory: data.weekly_history,
           todayEntries: data.today_entries ?? [],
         })
-      } catch (e: any) {
-        store.setError(e.message)
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Something went wrong')
       } finally {
-        store.setLoading(false)
+        setLoading(false)
       }
     }
     loadStats()
-  }, [])
+  }, [subscribeToPush, setLoading, setError, setAnalytics])
 
   if (store.isLoading && store.todayConfirmedCount === 0) {
     return (

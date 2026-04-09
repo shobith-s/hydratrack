@@ -32,8 +32,9 @@ export function CameraScreen() {
         })
         confirmed = verifyRes.confirmed
         confidence = verifyRes.confidence
-      } catch (apiErr: any) {
-        if (apiErr.message.includes('Failed to fetch') || !navigator.onLine) {
+      } catch (apiErr: unknown) {
+        const msg = apiErr instanceof Error ? apiErr.message : ''
+        if (msg.includes('Failed to fetch') || !navigator.onLine) {
           addOfflineLog({
             confirmed: true,
             confidence: 1.0,
@@ -53,8 +54,8 @@ export function CameraScreen() {
 
       navigate('/result', { state: { confirmed, confidence } })
 
-    } catch (err: any) {
-      setError(err.message || 'Failed to capture or verify.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to capture or verify.')
     } finally {
       setAnalyzing(false)
     }
