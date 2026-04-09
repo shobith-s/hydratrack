@@ -38,32 +38,34 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="neo-card max-w-sm w-full font-bold">
-        <h1 className="text-2xl mb-4 text-center">HydroTrack 💧</h1>
-        <p className="mb-6 text-sm text-center">Sign in to track your water intake and verify drinks with AI.</p>
-        
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input 
-            type="email" 
-            placeholder="Your email address" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="neo-input"
-            required
-            disabled={loading}
-          />
-          <button type="submit" className="neo-button primary w-full" disabled={loading}>
-            {loading ? 'Sending...' : 'Send Magic Link'}
-          </button>
-        </form>
+    <div className="app-container auth-view">
+      <main className="app-main flex-center">
+        <div className="neo-card" style={{ width: '100%' }}>
+          <h1 className="result-title" style={{ fontSize: '2rem', textAlign: 'center', marginBottom: '16px' }}>HydroTrack <span className="material-symbols-outlined" style={{color: 'var(--c-blue)'}}>water_drop</span></h1>
+          <p style={{ fontWeight: 600, textAlign: 'center', marginBottom: '32px', fontSize: '14px' }}>Sign in to track your water intake and verify drinks with AI.</p>
+          
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <input 
+              type="email" 
+              placeholder="Your email address" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="neo-input"
+              required
+              disabled={loading}
+            />
+            <button type="submit" className="neo-button-large neo-button-primary" disabled={loading}>
+              {loading ? 'Sending...' : 'Send Magic Link'}
+            </button>
+          </form>
 
-        {message && (
-          <div className="mt-4 p-3 bg-white neo-border text-sm text-center">
-            {message}
-          </div>
-        )}
-      </div>
+          {message && (
+            <div className="mt-4 p-3 bg-white neo-border text-sm text-center">
+              {message}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   )
 }
