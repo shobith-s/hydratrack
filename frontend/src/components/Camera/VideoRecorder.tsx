@@ -4,9 +4,11 @@ interface VideoRecorderProps {
   onVideoReady: (video: HTMLVideoElement) => void
   onError: (err: string) => void
   capturedFrames?: string[]
+  onClick?: () => void
+  isAnalyzing?: boolean
 }
 
-export function VideoRecorder({ onVideoReady, onError, capturedFrames = [] }: VideoRecorderProps) {
+export function VideoRecorder({ onVideoReady, onError, capturedFrames = [], onClick, isAnalyzing = false }: VideoRecorderProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
 
@@ -38,13 +40,15 @@ export function VideoRecorder({ onVideoReady, onError, capturedFrames = [] }: Vi
   }, [onVideoReady, onError])
 
   return (
-    <div className="relative w-full bg-neutral-800 border-[3px] border-black overflow-hidden" style={{ aspectRatio: '4/5', boxShadow: '5px 5px 0px #000' }}>
+    <div 
+      className="neo-card" 
+      style={{ padding: 0, position: 'relative', overflow: 'hidden', aspectRatio: '4/5', width: '100%', cursor: onClick ? 'pointer' : 'default', backgroundColor: '#000' }}
+      onClick={() => { if (!isAnalyzing && onClick) onClick() }}
+    >
       {/* Not-ready overlay */}
       {!stream && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)">
-            <path d="M12 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5 5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5z"/>
-          </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span className="material-symbols-outlined" style={{color: 'rgba(255,255,255,0.4)', fontSize: '48px'}}>videocam_off</span>
         </div>
       )}
 
@@ -54,36 +58,44 @@ export function VideoRecorder({ onVideoReady, onError, capturedFrames = [] }: Vi
         autoPlay
         playsInline
         muted
-        className="w-full h-full object-cover"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
 
       {/* Corner guide frame */}
-      <div className="absolute inset-[16px] border-[2px] border-white/20 pointer-events-none" />
+      <div style={{ position: 'absolute', inset: '16px', border: '3px solid rgba(255,255,255,0.5)', pointerEvents: 'none' }} />
 
       {/* READY tag */}
-      {stream && (
-        <div className="absolute top-4 right-4 bg-[#FDD400] border-[2px] border-black px-3 py-1 font-black text-xs tracking-widest uppercase z-10">
+      {stream && !isAnalyzing && (
+        <div style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: 'var(--c-yellow)', border: '2px solid var(--c-black)', padding: '4px 12px', fontWeight: 900, fontSize: '12px', textTransform: 'uppercase', zIndex: 10 }}>
           READY
         </div>
       )}
 
       {/* REC indicator */}
-      {stream && (
-        <div className="absolute top-4 left-4 flex items-center gap-1.5 z-10">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-[10px] text-white font-black uppercase leading-none">LIVE</span>
+      {stream && !isAnalyzing && (
+        <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 10 }}>
+          <div style={{ width: '10px', height: '10px', backgroundColor: 'var(--c-red)', borderRadius: '50%' }} />
+          <span style={{ fontSize: '12px', color: 'white', fontWeight: 900, textTransform: 'uppercase', textShadow: '1px 1px 0 #000' }}>TAP TO CAPTURE</span>
+        </div>
+      )}
+
+      {/* Analyzing Overlay */}
+      {isAnalyzing && (
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', gap: '16px' }}>
+             <span className="material-symbols-outlined" style={{ fontSize: '64px', animation: 'spin 1s linear infinite' }}>sync</span>
+             <h3 style={{ fontWeight: 900, fontSize: '24px', letterSpacing: '0.1em' }}>ANALYZING...</h3>
         </div>
       )}
 
       {/* Frame strip (bottom) */}
       {capturedFrames.length > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 bg-black/60 flex gap-2 p-2 z-10">
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', gap: '8px', padding: '8px', zIndex: 10 }}>
           {capturedFrames.map((f, i) => (
             <img
               key={i}
               src={`data:image/jpeg;base64,${f}`}
               alt={`Frame ${i + 1}`}
-              className="w-16 h-16 object-cover border-[2px] border-white/60 flex-shrink-0"
+              style={{ width: '64px', height: '64px', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.8)' }}
             />
           ))}
         </div>

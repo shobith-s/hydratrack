@@ -65,12 +65,18 @@ export function CameraScreen() {
     <div className="camera-container">
 
       {/* Viewfinder */}
-      <VideoRecorder onVideoReady={setVideoEl} onError={setError} capturedFrames={capturedFrames} />
+      <VideoRecorder 
+        onVideoReady={setVideoEl} 
+        onError={setError} 
+        capturedFrames={capturedFrames} 
+        onClick={handleCapture}
+        isAnalyzing={analyzing}
+      />
 
       {/* Instruction card */}
       <div className="camera-instruction">
-        <h2>DRINK WATER ON CAMERA</h2>
-        <p>Hold for 3–5 seconds. Show your face and the cup clearly within the frame.</p>
+        <h2>TAP SCREEN TO RECORD</h2>
+        <p>Tap the video feed and hold your drink for 3–5 seconds. Show your face clearly.</p>
       </div>
 
       {/* Frame preview strip */}
@@ -92,30 +98,6 @@ export function CameraScreen() {
           {error}
         </div>
       )}
-
-      {/* Hold to Record button */}
-      <div className="camera-record-actions">
-        <button
-          onClick={handleCapture}
-          disabled={!videoEl || analyzing}
-          className="camera-record-btn"
-          aria-label="Record"
-        >
-          {analyzing ? (
-             <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
-          ) : (
-             <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>videocam</span>
-          )}
-        </button>
-        <span className="status-text">
-          {analyzing ? 'ANALYZING...' : 'HOLD TO RECORD'}
-        </span>
-        {!analyzing && (
-          <p className="sub-text">
-            AI will verify your drink automatically
-          </p>
-        )}
-      </div>
 
     </div>
   )
