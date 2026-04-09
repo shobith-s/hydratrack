@@ -9,12 +9,9 @@ export function ProgressRing({ current, target }: { current: number; target: num
   const strokeDashoffset = circumference - (percent / 100) * circumference
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div
-        className="relative bg-white border-[3px] border-black flex items-center justify-center"
-        style={{ width: size, height: size, boxShadow: '5px 5px 0px #000' }}
-      >
-        <svg width={size} height={size} className="absolute inset-0" style={{ transform: 'rotate(-90deg)' }}>
+    <div className="hero-metrics">
+      <div className="progress-ring-container">
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
           {/* Track */}
           <circle
             cx={cx}
@@ -36,16 +33,16 @@ export function ProgressRing({ current, target }: { current: number; target: num
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="square"
-            className="transition-all duration-1000 ease-out"
+            style={{ transition: 'stroke-dashoffset 1s ease-out' }}
           />
         </svg>
-        <div className="relative flex flex-col items-center justify-center z-10">
-          <span className="font-black leading-none text-black" style={{ fontSize: '3rem' }}>{current.toLocaleString()}</span>
-          <span className="font-black uppercase tracking-widest text-xs border-t-[2px] border-black mt-1 pt-1">/ {target.toLocaleString()} ML</span>
+        <div className="progress-text">
+          <span className="progress-text-value">{current.toLocaleString()}</span>
+          <span className="progress-text-label">/ {target.toLocaleString()} ML</span>
         </div>
       </div>
-      <div className="bg-[#FDD400] border-[3px] border-black px-6 py-2">
-        <span className="font-black uppercase text-sm tracking-tight">Today's Goal</span>
+      <div className="today-goal-badge">
+        Today's Goal
       </div>
     </div>
   )

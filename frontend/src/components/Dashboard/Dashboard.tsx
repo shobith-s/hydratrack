@@ -18,8 +18,6 @@ export function Dashboard() {
   const navigate = useNavigate()
   const { subscribeToPush } = usePush()
 
-  // Extract stable Zustand action references so the effect deps are satisfied
-  // without causing re-runs (Zustand actions never change between renders)
   const setLoading = useDrinkStore(s => s.setLoading)
   const setError = useDrinkStore(s => s.setError)
   const setAnalytics = useDrinkStore(s => s.setAnalytics)
@@ -54,83 +52,68 @@ export function Dashboard() {
 
   if (store.isLoading && store.todayConfirmedCount === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="font-black text-center uppercase tracking-widest">Loading...</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <div style={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Loading...</div>
       </div>
     )
   }
 
   const pctDone = Math.round((store.todayMlEstimate / store.dailyGoalMl) * 100)
-  const nextReminderHrs = '1 HR'
+  const nextReminderHrs = '3 HRS'
 
   return (
-    <div className="px-4 py-6 flex flex-col gap-6 max-w-lg mx-auto w-full">
+    <>
+      <ProgressRing current={store.todayMlEstimate} target={store.dailyGoalMl} />
 
-      {/* Progress Ring */}
-      <div className="flex justify-center">
-        <ProgressRing current={store.todayMlEstimate} target={store.dailyGoalMl} />
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
-          <span className="text-2xl" style={{ color: '#FF4500' }}>🔥</span>
-          <span className="text-xl font-black leading-none">{store.streakDays}</span>
-          <span className="text-[10px] font-black uppercase leading-none mt-1">Streak</span>
+      <div className="neo-stats-grid">
+        <div className="neo-stat-box">
+          <span className="material-symbols-outlined" style={{ color: '#FF4500' }}>local_fire_department</span>
+          <span className="main-value">{store.streakDays}</span>
+          <span className="label">Streak</span>
         </div>
-        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
-          <span className="text-xl font-black leading-none text-[#0448FF]">📊</span>
-          <span className="text-xl font-black leading-none">{pctDone}%</span>
-          <span className="text-[10px] font-black uppercase leading-none mt-1">Done</span>
+        <div className="neo-stat-box">
+          <span className="material-symbols-outlined" style={{ color: 'var(--c-blue)' }}>pie_chart</span>
+          <span className="main-value">{pctDone}%</span>
+          <span className="label">Done</span>
         </div>
-        <div className="bg-white border-[3px] border-black p-3 flex flex-col items-center justify-center text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
-          <span className="text-xl font-black leading-none">⏱</span>
-          <span className="text-xl font-black leading-none">{nextReminderHrs}</span>
-          <span className="text-[10px] font-black uppercase leading-none mt-1">Reminder</span>
+        <div className="neo-stat-box">
+          <span className="material-symbols-outlined">schedule</span>
+          <span className="main-value">{nextReminderHrs}</span>
+          <span className="label">Reminder</span>
         </div>
       </div>
 
-      {/* Offline queue */}
       <EmergencyMode />
 
-      {/* Today's Drinks */}
-      <div className="flex flex-col gap-3">
-        <div className="relative inline-block">
-          <h2 className="text-xl font-black uppercase tracking-tight relative z-10">Today's Drinks</h2>
-          <div className="absolute bottom-1 left-0 w-full h-3 bg-[#FDD400] -z-[1]" />
+      <div>
+        <div className="section-title-wrapper">
+          <h2 className="section-title">Today's Drinks</h2>
+          <div className="section-title-highlight" />
         </div>
 
         {store.todayEntries.length === 0 ? (
-          <div className="bg-white border-[3px] border-black p-4 text-sm font-bold text-center" style={{ boxShadow: '5px 5px 0px #000' }}>
-            No drinks logged yet today. Tap <span className="font-black">RECORD</span> to start!
+          <div className="neo-card text-center">
+            No drinks logged yet today. <br />Tap <strong>RECORD</strong> to start!
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="drink-entries">
             {store.todayEntries.map((entry) => {
               const conf = entry.confidence != null ? Math.round(entry.confidence * 100) : null
               return (
-                <div
-                  key={entry.id}
-                  className="bg-white border-[3px] border-black p-4 flex justify-between items-center"
-                  style={{ boxShadow: '5px 5px 0px #000' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#0448FF] border-[3px] border-black flex items-center justify-center flex-shrink-0">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-                      </svg>
+                <div key={entry.id} className="drink-entry">
+                  <div className="drink-entry-left">
+                    <div className="drink-icon-box">
+                      <span className="material-symbols-outlined">water_full</span>
                     </div>
                     <div>
-                      <p className="font-black text-lg leading-none">{ML_PER_DRINK} ML</p>
-                      <p className="text-[10px] font-black uppercase opacity-60 mt-1">{formatTime(entry.logged_at)}</p>
+                      <div className="drink-amount">{ML_PER_DRINK} ML</div>
+                      <div className="drink-time">{formatTime(entry.logged_at)}</div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="bg-[#00C896] border-[2px] border-black px-2 py-0.5 text-[8px] font-black uppercase">
-                      Verified ✓
-                    </div>
+                  <div className="drink-entry-right">
+                    <div className="badge-verified">Verified ✓</div>
                     {conf != null && (
-                      <span className="text-[10px] font-black">{conf}% CONF.</span>
+                      <div className="confidence-text">{conf}% CONF.</div>
                     )}
                   </div>
                 </div>
@@ -141,7 +124,7 @@ export function Dashboard() {
       </div>
 
       {store.error && (
-        <div className="text-sm font-bold text-[#FF3B30] p-3 bg-white border-[3px] border-black text-center">
+        <div className="neo-banner error">
           {store.error}
         </div>
       )}
@@ -149,14 +132,11 @@ export function Dashboard() {
       {/* FAB: Log Drink */}
       <button
         onClick={() => navigate('/camera')}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-[#0448FF] border-[3px] border-black text-white flex items-center justify-center z-40 active:translate-x-[2px] active:translate-y-[2px] transition-all"
-        style={{ boxShadow: '5px 5px 0px #000' }}
+        className="neo-fab"
         aria-label="Log drink"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
+        <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>photo_camera</span>
       </button>
-    </div>
+    </>
   )
 }

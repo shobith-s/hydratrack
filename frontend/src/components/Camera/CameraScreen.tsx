@@ -62,69 +62,61 @@ export function CameraScreen() {
   }, [videoEl, analyzing, addOfflineLog, navigate])
 
   return (
-    <div className="px-4 py-6 flex flex-col gap-6 max-w-lg mx-auto w-full">
+    <div className="camera-container">
 
       {/* Viewfinder */}
       <VideoRecorder onVideoReady={setVideoEl} onError={setError} capturedFrames={capturedFrames} />
 
       {/* Instruction card */}
-      <div className="bg-white border-[3px] border-black p-5" style={{ boxShadow: '5px 5px 0px #000' }}>
-        <h2 className="font-black text-lg uppercase tracking-tight mb-1">DRINK WATER ON CAMERA</h2>
-        <p className="text-sm font-medium text-black/70 leading-tight">
-          Hold for 3–5 seconds. Show your face and the cup clearly within the frame.
-        </p>
+      <div className="camera-instruction">
+        <h2>DRINK WATER ON CAMERA</h2>
+        <p>Hold for 3–5 seconds. Show your face and the cup clearly within the frame.</p>
       </div>
 
-      {/* Frame preview strip (static placeholders before capture) */}
+      {/* Frame preview strip */}
       {capturedFrames.length === 0 && (
-        <div className="flex gap-2">
+        <div className="camera-frames">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="flex-1 border-[3px] border-black bg-white flex flex-col items-center justify-center py-3 gap-1">
-              <div className="w-10 h-10 bg-neutral-100 border-[2px] border-black/20 flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#bbb">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
+            <div key={n} className="camera-frame-box">
+              <div className="camera-frame-placeholder">
+                <span className="material-symbols-outlined" style={{ color: '#bbb', fontSize: '16px' }}>image</span>
               </div>
-              <span className="text-[8px] font-black uppercase">FRAME {n}</span>
+              <span>FRAME {n}</span>
             </div>
           ))}
         </div>
       )}
 
       {error && (
-        <div className="text-sm font-bold text-[#FF3B30] p-3 bg-white border-[3px] border-black">
+        <div className="neo-banner error">
           {error}
         </div>
       )}
 
       {/* Hold to Record button */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="camera-record-actions">
         <button
           onClick={handleCapture}
           disabled={!videoEl || analyzing}
-          className="w-20 h-20 rounded-full bg-[#FF3B30] border-[3px] border-black disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center"
-          style={{ boxShadow: '5px 5px 0px #000' }}
+          className="camera-record-btn"
           aria-label="Record"
         >
           {analyzing ? (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white" className="animate-spin">
-              <path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/>
-            </svg>
+             <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
           ) : (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-              <circle cx="12" cy="12" r="8"/>
-            </svg>
+             <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>videocam</span>
           )}
         </button>
-        <span className="font-black text-sm uppercase tracking-widest">
+        <span className="status-text">
           {analyzing ? 'ANALYZING...' : 'HOLD TO RECORD'}
         </span>
         {!analyzing && (
-          <p className="text-[10px] font-bold text-black/50 text-center">
+          <p className="sub-text">
             AI will verify your drink automatically
           </p>
         )}
       </div>
+
     </div>
   )
 }

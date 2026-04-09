@@ -27,38 +27,40 @@ export function WeeklyChart({ data, goalMl = 3000 }: WeeklyChartProps) {
   })()
 
   return (
-    <div className="bg-white border-[3px] border-black p-5 flex flex-col gap-5" style={{ boxShadow: '5px 5px 0px #000' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Bar chart */}
-      <div className="flex items-end justify-between gap-2" style={{ height: 140 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', height: '140px' }}>
         {sorted.map((d) => {
           const ml = d.confirmed_count * ML_PER_DRINK
           const heightPct = maxMl > 0 ? (ml / maxMl) * 100 : 0
           const dayName = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
           return (
-            <div key={d.date} className="flex flex-col items-center flex-1 h-full justify-end gap-1">
+            <div key={d.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', gap: '4px' }}>
               <div
-                className="w-full border-[3px] border-black transition-all duration-500"
                 style={{
+                  width: '100%',
+                  border: 'var(--border)',
+                  transition: 'height 0.5s',
                   height: `${Math.max(heightPct, 4)}%`,
-                  backgroundColor: d.goal_hit ? '#0448FF' : '#FDD400',
+                  backgroundColor: d.goal_hit ? 'var(--c-blue)' : 'var(--c-yellow)',
                 }}
               />
-              <span className="text-[9px] font-black">{dayName}</span>
+              <span style={{ fontSize: '9px', fontWeight: 900 }}>{dayName}</span>
             </div>
           )
         })}
       </div>
 
       {/* Stat chips */}
-      <div className="flex flex-wrap gap-2">
-        <div className="border-[3px] border-black px-3 py-1 bg-[#F8F4DC] font-black text-xs" style={{ boxShadow: '3px 3px 0px #000' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ border: 'var(--border)', padding: '4px 12px', backgroundColor: '#F8F4DC', fontWeight: 900, fontSize: '0.75rem', boxShadow: '3px 3px 0px var(--c-black)' }}>
           {daysHit}/{sorted.length} DAYS ✓
         </div>
-        <div className="border-[3px] border-black px-3 py-1 bg-[#F8F4DC] font-black text-xs" style={{ boxShadow: '3px 3px 0px #000' }}>
+        <div style={{ border: 'var(--border)', padding: '4px 12px', backgroundColor: '#F8F4DC', fontWeight: 900, fontSize: '0.75rem', boxShadow: '3px 3px 0px var(--c-black)' }}>
           AVG {avgL}L
         </div>
         {bestStreak > 0 && (
-          <div className="border-[3px] border-black px-3 py-1 bg-[#FDD400] font-black text-xs" style={{ boxShadow: '3px 3px 0px #000' }}>
+          <div style={{ border: 'var(--border)', padding: '4px 12px', backgroundColor: 'var(--c-yellow)', fontWeight: 900, fontSize: '0.75rem', boxShadow: '3px 3px 0px var(--c-black)' }}>
             BEST STREAK {bestStreak}
           </div>
         )}

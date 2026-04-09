@@ -2,7 +2,7 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req: Request) {
+export default async function handler() {
   // Uses VITE_API_BASE_URL to ping the HuggingFace space /health endpoint
   // to prevent it from sleeping due to inactivity.
   
@@ -27,8 +27,8 @@ export default async function handler(req: Request) {
         headers: { "Content-Type": "application/json" }
       });
     }
-  } catch (e: any) {
-    return new Response(JSON.stringify({ status: "error", message: e.message }), {
+  } catch (e: unknown) {
+    return new Response(JSON.stringify({ status: "error", message: e instanceof Error ? e.message : 'Unknown error' }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });

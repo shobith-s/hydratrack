@@ -25,17 +25,16 @@ export function HistoryScreen() {
   const isActiveWeek = weeklyHistory.some(d => d.goal_hit)
 
   return (
-    <div className="px-4 py-6 flex flex-col gap-6 max-w-lg mx-auto w-full">
-
+    <>
       {/* Weekly summary */}
-      <div className="bg-white border-[3px] border-black p-5 flex flex-col gap-5" style={{ boxShadow: '5px 5px 0px #000' }}>
-        <div className="flex justify-between items-end">
+      <div className="neo-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-black/50">This Week</p>
-            <p className="text-2xl font-black uppercase leading-tight">{weekLabel || '—'}</p>
+            <p style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5 }}>This Week</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.2 }}>{weekLabel || '—'}</p>
           </div>
           {isActiveWeek && (
-            <div className="bg-[#FDD400] border-[2px] border-black px-2 py-1 text-[10px] font-black uppercase" style={{ boxShadow: '3px 3px 0px #000' }}>
+            <div style={{ backgroundColor: 'var(--c-yellow)', border: '2px solid var(--c-black)', padding: '4px 8px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', boxShadow: '3px 3px 0px var(--c-black)' }}>
               ACTIVE WEEK
             </div>
           )}
@@ -45,46 +44,55 @@ export function HistoryScreen() {
       </div>
 
       {/* Daily log */}
-      <div className="relative inline-block">
-        <h2 className="text-3xl font-black uppercase italic tracking-tighter relative z-10">DAILY LOG</h2>
-        <div className="absolute bottom-1 left-0 w-full h-4 bg-[#FDD400] -z-[1]" />
-      </div>
-
-      {store.isLoading && (
-        <div className="font-black text-center uppercase tracking-widest py-8">Loading...</div>
-      )}
-
-      {!store.isLoading && weeklyHistory.length === 0 && (
-        <div className="bg-white border-[3px] border-black p-4 font-bold text-center text-sm" style={{ boxShadow: '5px 5px 0px #000' }}>
-          No history yet. Start logging drinks!
+      <div>
+        <div className="section-title-wrapper">
+          <h2 className="section-title" style={{ fontStyle: 'italic', fontSize: '1.875rem' }}>DAILY LOG</h2>
+          <div className="section-title-highlight" style={{ height: '16px' }} />
         </div>
-      )}
 
-      <div className="flex flex-col gap-4">
-        {[...weeklyHistory]
-          .sort((a, b) => b.date.localeCompare(a.date))
-          .map((day) => {
-            const ml = day.confirmed_count * ML_PER_DRINK
-            return (
-              <div
-                key={day.date}
-                className="bg-white border-[3px] border-black p-4 flex justify-between items-center active:translate-x-[2px] active:translate-y-[2px] transition-all"
-                style={{ boxShadow: '5px 5px 0px #000' }}
-              >
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-black/50">{formatDate(day.date)}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-black">{ml.toLocaleString()} ML</span>
-                    <span className="text-[10px] font-bold text-black/50">{day.confirmed_count}x drinks</span>
+        {store.isLoading && (
+          <div className="text-center font-black uppercase" style={{ padding: '32px 0', letterSpacing: '0.1em' }}>Loading...</div>
+        )}
+
+        {!store.isLoading && weeklyHistory.length === 0 && (
+          <div className="neo-card text-center" style={{ fontWeight: 700, fontSize: '0.875rem' }}>
+            No history yet. Start logging drinks!
+          </div>
+        )}
+
+        <div className="drink-entries">
+          {[...weeklyHistory]
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map((day) => {
+              const ml = day.confirmed_count * ML_PER_DRINK
+              return (
+                <div
+                  key={day.date}
+                  className="neo-card"
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.1s', cursor: 'pointer' }}
+                  onMouseDown={(e) => { e.currentTarget.style.transform = 'translate(2px, 2px)' }}
+                  onMouseUp={(e) => { e.currentTarget.style.transform = 'none' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'none' }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <p style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', opacity: 0.5 }}>{formatDate(day.date)}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{ml.toLocaleString()} ML</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, opacity: 0.5 }}>{day.confirmed_count}x drinks</span>
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '4px 8px', border: '2px solid var(--c-black)', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase',
+                    backgroundColor: day.goal_hit ? 'var(--c-mint)' : 'var(--c-red)',
+                    color: day.goal_hit ? 'var(--c-black)' : 'var(--c-white)'
+                  }}>
+                    {day.goal_hit ? 'GOAL ✓' : 'MISSED'}
                   </div>
                 </div>
-                <div className={`px-2 py-1 border-[2px] border-black text-[9px] font-black uppercase ${day.goal_hit ? 'bg-[#00C896] text-black' : 'bg-[#FF3B30] text-white'}`}>
-                  {day.goal_hit ? 'GOAL ✓' : 'MISSED'}
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

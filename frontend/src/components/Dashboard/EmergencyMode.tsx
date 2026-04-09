@@ -1,7 +1,6 @@
 import { useOfflineQueue } from '../../store/offlineQueueStore'
 import { fetchApi } from '../../lib/api'
 import { useState } from 'react'
-import { CloudOff, RefreshCw } from 'lucide-react'
 
 export function EmergencyMode() {
   const { queue, clearQueue } = useOfflineQueue()
@@ -25,28 +24,33 @@ export function EmergencyMode() {
       }
       clearQueue()
       alert("Offline logs synced successfully! Refresh to see updated stats.")
-    } catch (e: any) {
-      alert("Sync failed: " + e.message)
+    } catch (e: unknown) {
+      alert("Sync failed: " + (e instanceof Error ? e.message : 'Unknown error'))
     } finally {
       setSyncing(false)
     }
   }
 
   return (
-    <div className="neo-card bg-[#F6FA70] border-[#FF0060] mt-2 !p-3">
-      <div className="flex items-center gap-2 font-bold text-[#FF0060] mb-2">
-        <CloudOff size={20} />
+    <div className="neo-card" style={{ backgroundColor: '#F6FA70', borderColor: 'var(--c-red)', padding: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 900, color: 'var(--c-red)', marginBottom: '8px' }}>
+        <span className="material-symbols-outlined">cloud_off</span>
         <span>Offline Queue: {queue.length} un-synced drink{queue.length > 1 ? 's' : ''}</span>
       </div>
-      <p className="text-xs mb-3 font-semibold">Your recent drinks couldn't reach the server. We saved them locally.</p>
+      <p style={{ fontSize: '12px', marginBottom: '12px', fontWeight: 600 }}>Your recent drinks couldn't reach the server. We saved them locally.</p>
       
       <button 
         onClick={handleSync}
         disabled={syncing || !navigator.onLine}
-        className="neo-button w-full border-[#FF0060] text-sm !bg-white hover:!bg-gray-100 disabled:opacity-50"
+        className="neo-button-large"
+        style={{ height: '40px', backgroundColor: 'var(--c-white)', borderColor: 'var(--c-red)', fontSize: '14px' }}
       >
-        <RefreshCw size={16} className={syncing ? "animate-spin" : ""} /> 
-        {syncing ? 'Syncing...' : 'Sync Now'}
+        {syncing ? (
+          <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
+        ) : (
+          <span className="material-symbols-outlined">refresh</span>
+        )}
+        <span style={{ marginLeft: '4px' }}>{syncing ? 'Syncing...' : 'Sync Now'}</span>
       </button>
     </div>
   )
