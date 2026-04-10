@@ -42,7 +42,7 @@ export function VideoRecorder({ onVideoReady, onError, capturedFrames = [], onCl
   return (
     <div 
       className="neo-card" 
-      style={{ padding: 0, position: 'relative', overflow: 'hidden', aspectRatio: '4/5', width: '100%', cursor: onClick ? 'pointer' : 'default', backgroundColor: '#000' }}
+      style={{ padding: 0, position: 'relative', overflow: 'hidden', height: '100%', width: '100%', cursor: onClick ? 'pointer' : 'default', backgroundColor: '#000', borderRadius: 0 }}
       onClick={() => { if (!isAnalyzing && onClick) onClick() }}
     >
       {/* Not-ready overlay */}

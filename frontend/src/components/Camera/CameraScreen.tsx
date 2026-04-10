@@ -62,9 +62,22 @@ export function CameraScreen() {
   }, [videoEl, analyzing, addOfflineLog, navigate])
 
   return (
-    <div className="camera-container">
+    <div style={{ height: '100dvh', width: '100%', position: 'relative', backgroundColor: 'var(--c-bg)' }}>
+      {/* Back button overlay */}
+      <button 
+        onClick={() => navigate('/')} 
+        style={{ 
+          position: 'absolute', top: '16px', right: '16px', zIndex: 30, 
+          background: 'none', border: '2px solid white', 
+          borderRadius: '50%', width: '48px', height: '48px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'white', backgroundColor: 'rgba(0,0,0,0.5)', cursor: 'pointer'
+        }}
+      >
+        <span className="material-symbols-outlined">close</span>
+      </button>
 
-      {/* Viewfinder */}
+      {/* Full-bleed viewfinder */}
       <VideoRecorder 
         onVideoReady={setVideoEl} 
         onError={setError} 
@@ -73,32 +86,11 @@ export function CameraScreen() {
         isAnalyzing={analyzing}
       />
 
-      {/* Instruction card */}
-      <div className="camera-instruction">
-        <h2>TAP SCREEN TO RECORD</h2>
-        <p>Tap the video feed and hold your drink for 3–5 seconds. Show your face clearly.</p>
-      </div>
-
-      {/* Frame preview strip */}
-      {capturedFrames.length === 0 && (
-        <div className="camera-frames">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="camera-frame-box">
-              <div className="camera-frame-placeholder">
-                <span className="material-symbols-outlined" style={{ color: '#bbb', fontSize: '16px' }}>image</span>
-              </div>
-              <span>FRAME {n}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
       {error && (
-        <div className="neo-banner error">
+        <div className="neo-banner error" style={{ position: 'absolute', bottom: '24px', left: '16px', right: '16px', zIndex: 30 }}>
           {error}
         </div>
       )}
-
     </div>
   )
 }
